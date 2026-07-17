@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>手繪風交通安全網頁遊戲</title>
+    <style>
+        body { background-color: #222; text-align: center; margin: 0; padding: 20px; font-family: sans-serif; }
+        canvas { background-color: #f5f2e2; border: 4px solid #4c8537; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        #status { color: white; font-size: 20px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="status">WebSocket 伺服器狀態：連線中...</div>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+// ==========================================
+// 1. 建立 WebSocket 連線（接收 Python 指令）
+// ==========================================
+let currentAction = "NONE";
+const statusDiv = document.getElementById("status");
+const ws = new WebSocket("ws://localhost:8765");
+
+ws.onopen = () => { statusDiv.innerText = "🟢 WebSocket 連線成功！正在接收 Python 手勢指令..."; statusDiv.style.color = "#4c8537"; };
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    currentAction = data.action;
+};
+ws.onerror = () => { statusDiv.innerText = "🔴 連線失敗，請確保 Python 辨識程式已開啟。"; statusDiv.style.color = "#ff4d4d"; };
+
+// ==========================================
+// 2. 遊戲本體與手繪地圖卷軸引擎 (HTML5 Canvas)
+// ==========================================
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// 宣告影像素材物件
+const imgCar1 = new Image(); imgCar1.src = 'c_1.jpg';
+const imgCar2 = new Image(); imgCar2.src = 'c_1-1.jpg';
+const imgSun1 = new Image(); imgSun1.src = 'sun_1.png';
+const imgSun2 = new Image(); imgSun2.src = 'sun_2.png';
+const imgFlower1 = new Image(); imgFlower1.src = 'sunflower_1.png';
+const imgFlower2 = new Image(); imgFlower2.src = 'sunflower_2.png';
+const imgCloud = new Image(); imgCloud.src = 'cloud.png';
+
+// 遊戲控制變數
+let scrollSpeed = 4;
+let carY = 400;
+let frameCounter = 0;
+let carFrameToggle = false;
+let sunFrameToggle = false;
+let flowerFrameToggle = false;
+
+// 初始化背景捲軸物件陣列 (樣板組合)
+let clouds = [
+    { x: 100, y: 50, speedFactor: 0.3 },
+    { x: 450, y: 120, speedFactor: 0.3 },
+    { x: 750, y: 70, speedFactor: 0.3 }
+];
+
+let flowers = [
+    { x: 50, y: 410, speedFactor: 1.0 },
+    { x: 350, y: 410, speedFactor: 1.0 },
+    { x: 650, y: 410, speedFactor: 1.0 }
+];
+
+// 畫筆風格地面繪製
+function drawHandDrawnRoad() {
+    // 畫草地邊界粗線
+    ctx.strokeStyle = "#4c8537";
+    ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(0, 480); ctx.lineTo(800, 480); ctx.stroke();
+
+    // 畫馬路路面
+    ctx.fillStyle = "#d2cdb5";
+    ctx.fillRect(0, 484, 800, 120);
+
+    // 畫中央雙黃線
+    ctx.strokeStyle = "#e6b432";
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(0, 540); ctx.lineTo(800, 540); ctx.stroke();
+}
+
+// 遊戲主循環
+function gameLoop() {
+    frameCounter++;
+
+    // 3. 依據 Python 指令調控車速與方向
+    if (currentAction === "STOP / SLOW DOWN") {
+        scrollSpeed = 0;
+    } else if (currentAction === "OVERTAKE ALLOWED") {
+        scrollSpeed = 8;
+    } else if (currentAction === "LEFT TURN") {
+        scrollSpeed = 3;
+        carY = Math.max(360, carY - 2);
+    } else if (currentAction === "RIGHT TURN") {
+        scrollSpeed = 3;
+        carY = Math.min(440, carY + 2);
+    } else {
+        scrollSpeed = 4; // 預設直行
+    }
+
+    // 清空畫布
+    ctx.clearRect(0, 0, 800, 600);
+
+    // 繪製馬路背景
+    drawHandDrawnRoad();
+
+    // 兩幀動畫切換定時器 (每 15 幀切換一次)
+    if (frameCounter % 15 === 0) {
+        sunFrameToggle = !sunFrameToggle;
+        flowerFrameToggle = !flowerFrameToggle;
+        if (scrollSpeed > 0) carFrameToggle = !carFrameToggle; // 車子有動輪胎才轉
+    }
+
+    // 繪製與更新太陽 (遠景，幾乎不動)
+    ctx.drawImage(sunFrameToggle ? imgSun1 : imgSun2, 650, 30, 100, 100);
+
+    // 繪製與更新白雲 (中景)
+    clouds.forEach(c => {
+        c.x -= scrollSpeed * c.speedFactor;
+        ctx.drawImage(imgCloud, c.x, c.y, 120, 60);
+        if (c.x < -150) c.x = 850 + Math.random() * 200; // 循環生成
+    });
+
+    // 繪製與更新向日葵 (近景)
+    flowers.forEach(f => {
+        f.x -= scrollSpeed * f.speedFactor;
+        ctx.drawImage(flowerFrameToggle ? imgFlower1 : imgFlower2, f.x, f.y, 60, 80);
+        if (f.x < -80) f.x = 850 + Math.random() * 200; // 循環生成
+    });
+
+    // 繪製小車車
+    ctx.drawImage(carFrameToggle ? imgCar1 : imgCar2, 100, carY, 120, 90);
+
+    // 顯示即時控制文字
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 24px Arial";
+    ctx.fillText("手勢交通指令: " + (currentAction === "NONE" ? "GO STRAIGHT" : currentAction), 30, 50);
+
+    requestAnimationFrame(gameLoop);
+}
+
+// 啟動網頁遊戲
+gameLoop();
+</script>
+</body>
+</html>

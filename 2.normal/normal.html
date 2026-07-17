@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常規行車場景 - CSS 捲軸</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入一般場景為背景，設定水平重複 */
+            background-image: url('background.png');
+            background-size: auto 100%; /* 高度撐滿，寬度等比例 */
+            background-repeat: repeat-x; /* 水平無限重複 */
+            
+            /* 觸發背景向左捲動動畫（12秒循環一次，線性無縫，無限循環） */
+            animation: scrollBackground 12s linear infinite;
+        }
+
+        /* 2. 背景往左捲動的關鍵影格 */
+        @keyframes scrollBackground {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                /* 往左移動一個完整背景圖寬度的距離以達成無縫銜接 */
+                background-position: -1000px 0; 
+            }
+        }
+
+        /* 3. 小車定位與上下抖動動畫 */
+        .player-car {
+            position: absolute;
+            width: 320px;  /* 依據你的素材比例調整 */
+            height: auto;
+            
+            /* 台灣靠右行駛定位：
+               車頭朝右，故車子放在畫面的下車道（偏右側車道在畫面中看起來是靠下側） */
+            left: 150px; 
+            bottom: -10px; /* 貼近下車道 */
+            
+            /* 微幅抖動，模擬引擎與路面起伏（0.8秒一個循環，上下抖動） */
+            animation: carVibration 0.8s ease-in-out infinite alternate;
+        }
+
+        /* 4. 小車抖動的關鍵影格 */
+        @keyframes carVibration {
+            from {
+                transform: translateY(0px);
+            }
+            to {
+                transform: translateY(-4px); /* 輕微往上跳動 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <img src="CAR.gif" class="player-car" alt="行駛小車">
+    </div>
+
+</body>
+</html>

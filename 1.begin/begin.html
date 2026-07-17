@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開場轉場 - 完美細節修正版</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入 begin.png */
+            background-image: url('begin.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 2. 小車定位與滑順一鏡到底動畫 (中層) */
+        .player-car {
+            position: absolute;
+            width: 320px;  
+            height: auto;
+            bottom: -10px; 
+            
+            /* 【優化】
+               改用 cubic-bezier 自然慣性曲線，取代死板的 linear。
+               這可以完美解決加速瞬間的卡頓感！
+            */
+            animation: driveThrough 11s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; /* 夾在中間 */
+        }
+
+        /* 3. 重新平滑分配的一鏡到底時間軸 */
+        @keyframes driveThrough {
+            /* 0% ~ 30%：平穩滑入 */
+            5% {
+                left: -350px; 
+            }
+            30% {
+                left: 100px;  
+                transform: translateY(0px);
+            }
+            /* 30% ~ 65%：原地震動怠速 (平滑無縫震動) */
+            35% { left: 100px; transform: translateY(-3px); }
+            40% { left: 100px; transform: translateY(0px); }
+            45% { left: 100px; transform: translateY(-3px); }
+
+           
+            
+            /* 65% ~ 70%：油門發動前蓄力 (車身微微往後縮一下，呈現真實物理反彈) */
+            50% { 
+                left: 100px; 
+                transform: translate(-3px, 1px); 
+            }
+            55% {
+                left: 100px;
+                transform: translate(0px, 0px);
+            }
+            /* 70% ~ 100%：極速猛踩油門，無縫衝出畫面 */
+            100% {
+                left: 2000px; /* 衝出最右側 */
+                transform: translateY(0px);
+            }
+        }
+
+        /* 4. 前景柵欄定位 (頂層) */
+.foreground-fence {
+    position: absolute;
+    
+    /* ==========================================
+       👇 調整這裡的數值，直接對準背景的小溪木橋！
+       ========================================== */
+    width: 225px;       /* 1. 調整寬度，使其與背景木橋上的欄杆等寬 */
+    height: 88px;       /* 2. 調整高度，使其符合欄杆比例 */
+    left: 145px;        /* 3. 調整 X 軸，把欄杆移到左下角的小溪木橋上方 */
+    bottom: 30px;       /* 4. 調整 Y 軸，往上或往下移動，直到完美遮住車輪 */
+    
+    background-image: url('fence.png');
+    background-size: contain; /* 確保圖片不變形地縮放在這個框框裡 */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    z-index: 3; /* 壓在車子(z-index: 2)最前方 */
+    pointer-events: none; 
+
+}
+/* 5. 靜態花朵物件 (背景層 z-index: 1.5) */
+        .scenery-flower {
+            position: absolute;
+            width: 130px; /* 依照素材比例縮放花朵大小 */
+            height: auto;
+            z-index: 1.5; /* 擺在背景 begin.png 前面，但是會被小車(z-index: 2)稍稍擋住 */
+            pointer-events: none;
+        }
+
+        /* 擺在左邊草地（小溪木橋右側）的花叢 */
+        .flower-left {
+            left: 380px;
+            bottom: -50px;
+        }
+
+        /* 擺在右邊大樹旁的花叢 */
+        .flower-right {
+            right: 180px;
+            bottom: -50px;
+        }
+
+        /* 5. 「開始！」字體圖片與淡入淡出動畫 */
+        .start-banner {
+            position: absolute;
+            width: 200px; /* 調整字體圖片大小 */
+            height: auto;
+            
+            /* 置中於畫面上半部空曠處 */
+            left: 50%;
+            top: 70px;
+            transform: translateX(-50%);
+            
+            /* 動畫：6秒內，與車子原地等候的時間軸（30% ~ 65%）完美重對齊 */
+            animation: bannerFade 6s ease-in-out forwards;
+            z-index: 4; /* 最上層 */
+            pointer-events: none;
+        }
+        
+
+        /* 6. 「開始！」字體淡入淡出時間軸 */
+        @keyframes bannerFade {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -15px) scale(0.5); /* 從稍微上方、縮小淡入，手繪感更靈活 */
+            }
+            25% {
+                opacity: 0;
+            }
+            /* 32% ~ 58%：完全顯現（車子原地怠速時） */
+            32% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+            58% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+            /* 65% ~ 100%：在車子衝刺前優雅淡出不留痕跡 */
+            65%, 100% {
+                opacity: 0;
+                transform: translate(-50%, 15px) scale(0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <img src="begin_font.png" class="start-banner" alt="開始遊戲">
+
+        <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
+
+        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
+
+        <img src="CAR.gif" class="player-car" alt="行駛小車">
+        
+        <div class="foreground-fence"></div>
+    </div>
+
+</body>
+</html>

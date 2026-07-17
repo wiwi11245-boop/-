@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事件轉場 - 後車接近並同行</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入 background.jpg (事件中，背景停止滾動) */
+            background-image: url('background.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+        .static-sun {
+            position: absolute;
+            top: -62px;      /* 距離頂部 */
+            left: 98px;     /* 距離左側 */
+            width: 172px;   /* 依據你的比例調整太陽大小 */
+            height: auto;
+            z-index: 1.5;   /* 夾在背景與車子中間，不影響車體 */
+            pointer-events: none;
+        }
+
+        /* 2. 紅色主角車定位與時間軸 (中層) */
+        .player-car {
+            position: absolute;
+            width: 160px;  
+            height: auto;
+            bottom: -5px; 
+            
+            /* 總長 8 秒的事件動畫 */
+            animation: redCarEvent 8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 3. 藍色後方來車定位與時間軸 (中層) */
+        .blue-car {
+            position: absolute;
+            width: 160px;
+            height: auto;
+            bottom: 15px; /* 同樣靠右行駛，高度與紅車一致 */
+            
+            /* 與紅車完全同步播放 8 秒動畫 */
+            animation: blueCarEvent 8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2;
+        }
+
+        /* ==========================================
+           4. 紅車（主角）事件時間軸
+           ========================================== */
+        @keyframes redCarEvent {
+            /* 0% ~ 55% (約 0s - 4.4s)：紅車靜止在馬路上，原地怠速抖動 */
+            0% { left: 315px; transform: translateY(0px); }
+            10% { left: 315px; transform: translateY(-3px); }
+            20% { left: 315px; transform: translateY(0px); }
+            30% { left: 315px; transform: translateY(-3px); }
+            40% { left: 315px; transform: translateY(0px); }
+            50% { left: 315px; transform: translateY(-3px); }
+            
+            /* 55% ~ 60% (約 4.4s - 4.8s)：藍車抵達，紅車引擎蓄力準備出發（車身微後縮） */
+            55% { 
+                left: 315px; 
+                transform: translate(-3px, 1px); 
+            }
+            60% {
+                left: 315px;
+                transform: translate(0px, 0px);
+            }
+            
+            /* 60% ~ 100% (約 4.8s - 8s)：踩油門，以 1000px 的總位移量衝出右側畫面 */
+            100% {
+                left: 1240px; 
+                transform: translateY(0px);
+            }
+        }
+
+        /* ==========================================
+           5. 藍車（事件來車）事件時間軸
+           ========================================== */
+        @keyframes blueCarEvent {
+            /* 0% (0s)：起點在畫面最左側外，完全看不見 */
+            0% {
+                left: -400px;
+            }
+            
+            /* 0% ~ 50% (0s - 4s)：藍車從後方平穩滑入，接近並停在紅車後方一個車距處 */
+            50% {
+                left: 150px; 
+                transform: translateY(0px);
+            }
+            
+            /* 50% ~ 55% (4s - 4.4s)：抵達位置，短暫的原地怠速抖動（戲劇性停頓） */
+            53% {
+                left: 150px;
+                transform: translateY(-3px);
+            }
+            55% {
+                left: 150px;
+                transform: translateY(0px);
+            }
+
+            /* 55% ~ 60% (4.4s - 4.8s)：跟隨紅車一起發動蓄力（車身微後縮） */
+            58% {
+                left: 150px;
+                transform: translate(-3px, 1px); /* 保持 left 物理位置不變，僅微幅抖動 */
+            }
+            60% {
+                left: 150px;
+                transform: translate(0px, 0px);
+            }
+
+            /* 60% ~ 100% (4.8s - 8s)：與紅車同步加速，同樣往前位移 1000px，完美同速出鏡！ */
+            100% {
+                left: 1000px; /* -180px + 1000px = 820px (車尾完全離開右邊界) */
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+        <img src="CAR2.gif" class="blue-car" alt="藍車事件">
+        <img src="SUN.gif" class="static-sun" alt="太陽">
+    </div>
+
+</body>
+</html>
