@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>左轉事件場景 - 前半段駛入與停滯</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            background-image: url('左轉場景.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 2. 獨立太陽定位 (原地旋轉) */
+        .static-sun {
+            position: absolute;
+            top: -62px;      /* 你的微調值 */
+            left: 98px;      /* 你的微調值 */
+            width: 172px;    /* 你的微調值 */
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 3. 靜態花朵物件 */
+        .scenery-flower {
+            position: absolute;
+            width: 130px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+        .flower-left {
+            left: 30px;     
+            bottom: -50px;   
+        }
+
+        .flower-middle {
+            left: 380px;     
+            bottom: -50px;   
+        }
+
+        .flower-right {
+            right: 130px;    
+            bottom: -50px;   
+        }
+
+        /* 4. 紅色主角車定位與動畫 (直接作為實體圖層，不加任何裁剪框) */
+        .player-car {
+            position: absolute;
+            width: 160px;       /* 你的微調車寬 */
+            height: auto;       
+            bottom: -5px;       /* 你的貼地高度 */
+            
+            /* 總長 7 秒的動畫：2秒駛入 + 5秒停滯怠速 */
+            animation: redCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 5. 藍色後方來車定位與時間軸 */
+        .blue-car {
+            position: absolute;
+            width: 160px;       /* 你的微調車寬 */
+            height: auto;
+            bottom: 15px;       /* 你的微調高度 */
+            
+            /* 與紅車完全同步播放 7 秒動畫 */
+            animation: blueCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2;
+        }
+
+        /* ==========================================
+           6. 紅車（主角）駛入與 5 秒停滯時間軸
+           ========================================== */
+        @keyframes redCarEnterStage {
+            /* 0% ~ 30%：從最左側外完全隱形滑入至中央 315px 定位點 */
+            0% {
+                left: -200px; 
+                transform: translateY(0px);
+            }
+            30% {
+                left: 315px;    /* 抵達你的中央指定位置 */
+                transform: translateY(0px);
+            }
+            
+            /* 30% ~ 100% (整整 5 秒)：原地重複怠速抖動 */
+            40% { left: 315px; transform: translateY(-3px); }
+            50% { left: 315px; transform: translateY(0px); }
+            60% { left: 315px; transform: translateY(-3px); }
+            70% { left: 315px; transform: translateY(0px); }
+            80% { left: 315px; transform: translateY(-3px); }
+            90% { left: 315px; transform: translateY(0px); }
+            100% {
+                left: 315px;   
+                transform: translateY(0px);
+            }
+        }
+
+        /* ==========================================
+           7. 藍車（後車）駛入與 5 秒停滯時間軸
+           ========================================== */
+        @keyframes blueCarEnterStage {
+            /* 0% ~ 30%：從最左側外同步滑入至後方 150px 定位點 */
+            0% {
+                left: -200px;
+                transform: translateY(0px);
+            }
+            30% {
+                left: 150px;    /* 抵達你的中央指定位置 */
+                transform: translateY(0px);
+            }
+            
+            /* 30% ~ 100% (整整 5 秒)：與紅車同步在原地進行引擎怠速抖動 */
+            40% { left: 150px; transform: translateY(-3px); }
+            50% { left: 150px; transform: translateY(0px); }
+            60% { left: 150px; transform: translateY(-3px); }
+            70% { left: 150px; transform: translateY(0px); }
+            80% { left: 150px; transform: translateY(-3px); }
+            90% { left: 150px; transform: translateY(0px); }
+            100% {
+                left: 150px;    
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 獨立靜態太陽 -->
+        <img src="sun.gif" class="static-sun" alt="原地太陽">
+
+        <!-- 靜態裝飾向日葵花叢 -->
+         <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
+        <img src="FLOWER.gif" class="scenery-flower flower-middle" alt="裝飾花朵">
+        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
+        <!-- 紅色主角車 (乾淨無裁切物件) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 藍色事件車 -->
+        <img src="CAR2.gif" class="blue-car" alt="藍車事件">
+    </div>
+
+</body>
+</html>

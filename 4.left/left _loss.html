@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>左轉事件場景 - 下半段（遊戲失敗）</title>
+    <style>
+        /* 1. 遊戲視窗容器 (與上半段相同) */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            background-image: url('左轉場景.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 2. 獨立太陽定位 (原地旋轉，靜止不動) */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 3. 靜態花朵物件 (靜止不動) */
+        .scenery-flower {
+            position: absolute;
+            width: 130px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+        .flower-left {
+            left: 30px;     
+            bottom: -50px;   
+        }
+
+        .flower-middle {
+            left: 380px;     
+            bottom: -50px;   
+        }
+
+        .flower-right {
+            right: 130px;    
+            bottom: -50px;   
+        }
+
+        /* ==========================================
+           🛠️ 核心修正：紅色主角車定位與追撞動畫
+           ========================================== */
+        .player-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: -5px;       /* 你的貼地高度 */
+            
+            /* 失敗場景總長度設定為 10s */
+            animation: redCarFailure 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 5. 藍色追撞車定位與動畫 */
+        .blue-car {
+            position: absolute;
+            width: 160px;
+            height: auto;
+            bottom: 15px;       
+            
+            /* 與紅車完全同步播放 10 秒動畫 */
+            animation: blueCarFailure 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2;
+        }
+
+        /* 🟢 新增：爆炸特效定位 */
+        .bomb-effect {
+            position: absolute;
+            width: 150px;       
+            height: 180px;      /* 給予固定高寬 */
+            left: 640px;        
+            bottom: 15px;       
+            
+            animation: bombEffectFade 7s ease-out forwards;
+            z-index: 3;         
+            pointer-events: none;
+        }
+
+        /* 🔵 新增：「遊戲失敗」標題定位 */
+        .failure-banner {
+            position: absolute;
+            width: 200px;       /* 標題大小 */
+            height: auto;
+            left: 50%;
+            top: -100px;          /* 置中於畫面上半部 */
+            transform: translateX(-50%);
+            
+            /* 標題淡入動畫 */
+            animation: bannerFadeIn 7s ease-out forwards;
+            z-index: 4;         /* 最頂層 */
+            pointer-events: none;
+            opacity: 0;         /* 一開始隱形 */
+        }
+
+        /* ==========================================
+           6. 紅車（主角）失敗場景時間軸
+           ========================================== */
+        @keyframes redCarFailure {
+            /* 0% ~ 30% (0s - 3s)：接續上半段，停滯原地怠速抖動 */
+            0% { left: 315px; transform: translateY(0px); }
+            
+            /* 30% ~ 60% (3s - 6s)：紅車出發，以滑順加速度走向轉角處 */
+            60% {
+                left: 650px;    /* 抵達轉角處定位點 */
+                transform: translateY(0px);
+            }
+            
+            /* 60% ~ 65% (6s - 6.5s)：碰撞瞬間，紅車被藍車撞擊車尾，產生微幅晃動 */
+            60.1% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
+            61% { left: 650px; transform: translate(0px, 0px) rotate(0deg); }
+            62% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
+            63% { left: 650px; transform: translate(0px, 0px) rotate(0deg); }
+            64% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
+            
+            /* 65% ~ 100% (6.5s - 10s)：定格失敗狀態 */
+            65%, 100% {
+                left: 650px;   /* 停滯在車禍位置 */
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+        }
+
+        /* ==========================================
+           7. 藍車（追撞車）失敗場景時間軸
+           ========================================== */
+        @keyframes blueCarFailure {
+            /* 0% ~ 30% (0s - 3s)：同步在原地怠速抖動 */
+            0% { left: 150px; transform: translateY(0px); }
+            
+            /* 30% ~ 60% (3s - 6s)：藍車踩油門猛烈衝刺，追撞紅車 */
+            60% {
+                left: 560px;    /* 撞擊瞬間位置：紅車650px - 藍車車頭長度160px 左右 */
+                transform: translateY(0px);
+            }
+            
+            /* 60% ~ 65% (6s - 6.5s)：碰撞瞬間，藍車車頭產生晃動 */
+            60.1% { left: 560px; transform: translate(-2px, 1px) rotate(-1deg); }
+            61% { left: 560px; transform: translate(0px, 0px) rotate(0deg); }
+            62% { left: 560px; transform: translate(-2px, 1px) rotate(-1deg); }
+            63% { left: 560px; transform: translate(0px, 0px) rotate(0deg); }
+            
+            /* 65% ~ 100% (6.5s - 10s)：定格車禍位置 */
+            65%, 100% {
+                left: 550px;   /* 停滯在碰撞位置 */
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+        }
+
+        /* ==========================================
+           8. 爆炸特效淡入與晃動時間軸
+           ========================================== */
+        @keyframes bombEffectFade {
+            /* 0% ~ 59.9%：完全不加載圖片，content 保持為空，瀏覽器在此期間不會下載或啟動 GIF */
+            0%, 30% { 
+                content: none;
+                opacity: 0; 
+                transform: scale(0.5); 
+            }
+            
+            /* 60% (撞擊發生瞬間)：這時才把 'BOMB.gif' 放進來，強迫瀏覽器從第 1 影格開始播放 */
+            31% {
+                content: url('BOMB.gif');
+                opacity: 1;
+                transform: scale(1.2) translate(-3px, 2px) rotate(-4deg);
+            }
+            /* 60% ~ 65%：爆炸煙霧震動 */
+            61.5% { transform: scale(1.15) translate(3px, -2px) rotate(4deg); }
+            63% { transform: scale(1.1) translate(-2px, 1px) rotate(-2deg); }
+            64.5% { transform: scale(1.05) translate(1px, -1px) rotate(1deg); }
+            
+            /* 65% ~ 75%：爆炸播完，慢慢淡出隱形 */
+            65% {
+                opacity: 1;
+                transform: scale(1) translate(0px, 0px) rotate(0deg);
+            }
+            75% {
+                opacity: 0;
+                transform: scale(0.8) translate(0, 10px) rotate(0deg);
+                content: url('BOMB.gif'); /* 保持圖片載入狀態完成淡出 */
+            }
+            /* 75.1% ~ 100%：淡出完畢後再次移除圖片，為下一次播放做準備 */
+            75.1%, 100% {
+                content: none;
+                opacity: 0;
+            }
+        }
+
+        /* ==========================================
+           9. 「遊戲失敗」標題淡入時間軸
+           ========================================== */
+        @keyframes bannerFadeIn {
+            /* 0% ~ 70% (特效淡出完成前)：隱形 */
+            0%, 44% {
+                opacity: 0;
+                transform: translate(-50%, -15px) scale(0.8); /* 從稍微上方、縮小淡入 */
+            }
+            
+            /* 75% ~ 100% (場景最終定格)：完全顯現 */
+            45% {
+                opacity: 0.1;
+                transform: translate(-50%, 0) scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: translate(-50%, 0) scale(1);
+            }
+            55% {
+                opacity: 0.5;
+                transform: translate(-50%, 0) scale(1);
+            }
+            60% {
+                opacity: 0.7;
+                transform: translate(-50%, 0) scale(1);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 「遊戲失敗」標題 (最上層) -->
+        <img src="遊戲失敗.png" class="failure-banner" alt="遊戲失敗標題">
+
+        <!-- 獨立靜態太陽 -->
+        <img src="sun.gif" class="static-sun" alt="原地太陽">
+
+        <!-- 靜態裝飾向日葵花叢 -->
+        <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
+        <img src="FLOWER.gif" class="scenery-flower flower-middle" alt="裝飾花朵">
+        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
+
+        <!-- 爆炸特效 (夾在中間) -->
+        <img src="BOMB.gif" class="bomb-effect" alt="爆炸特效">
+
+        <!-- 紅色主角車 (乾淨無裁切物件) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 藍色追撞車 -->
+        <img src="CAR2.gif" class="blue-car" alt="藍車追撞">
+    </div>
+
+</body>
+</html>
