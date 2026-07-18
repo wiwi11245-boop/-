@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緩停事件場景 - 前半段觸發優化版</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            background-image: url('停止場景.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 2. 獨立太陽定位 (原地旋轉) */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* ==========================================
+           🛠️ 修正 2：頂層房屋比例放大與右移 (z-index: 3)
+           ========================================== */
+        .top-house {
+            position: absolute;
+            width: 110px;       /* 稍微放大房屋比例 */
+            height: auto;
+            bottom: -10px;      
+            z-index: 3;         /* 確保壓在所有車輛最前方 */
+            pointer-events: none;
+        }
+        /* 第一棟房屋往右調整位置 */
+        .house-1 {
+            left: 730px;
+        }
+        /* 第二棟房屋往右調整位置 */
+        .house-2 {
+            left: 880px;
+        }
+
+        /* 3. 紅色主角車定位與動畫 */
+        .player-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: -5px;       
+            
+            animation: redCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 4. 藍色後方來車定位與時間軸 (CAR2) */
+        .blue-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;
+            bottom: 15px;       
+            
+            animation: blueCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2;
+        }
+
+        /* ==========================================
+           🛠️ 修正 1 & 3：對向迴轉車 CAR3 大小縮小與定位群組
+           ========================================== */
+        .car3-event-group {
+            position: absolute;
+            width: 110px;       /* 修正：大小縮小，與其他車輛完全一致 */
+            height: auto;
+            left: 740px;        /* 對向車道定位點 */
+            bottom: 70px;       
+            z-index: 1.8;       
+            opacity: 0;         
+            
+            animation: car3ShowUp 7s linear forwards;
+        }
+
+        /* CAR3 內部圖片的基礎重疊定位 */
+        .car3-event-group img {
+            position: absolute;
+            height: auto;
+            bottom: 0;
+        }
+
+        /* 側身車圖塊：調整閃爍速度為 1s 循環 */
+        .car3-side {
+            width: 100%;
+            left: 0;
+            animation: flashImgA 2s linear infinite; /* 調整為 1s */
+        }
+
+        /* 後視車圖塊：與側身車錯開一個車身的距離 (向右偏移)，閃爍速度為 1s 循環 */
+        .car3-back {
+            width: 95px;       /* 符合透視的比例縮小 */
+            left: 130px;         /* 修正：往右偏移，與側向視角拉開一個車身距離 */
+            animation: flashImgB 2s linear infinite; /* 調整為 1s */
+        }
+
+        /* ==========================================
+           5. 動態時間軸控制 (Keyframes)
+           ========================================== */
+        @keyframes redCarEnterStage {
+            0% { left: -200px; transform: translateY(0px); }
+            30% { left: 315px; transform: translateY(0px); }
+            40% { left: 315px; transform: translateY(-3px); }
+            50% { left: 315px; transform: translateY(0px); }
+            60% { left: 315px; transform: translateY(-3px); }
+            70% { left: 315px; transform: translateY(0px); }
+            80% { left: 315px; transform: translateY(-3px); }
+            90% { left: 315px; transform: translateY(0px); }
+            100% { left: 315px; transform: translateY(0px); }
+        }
+
+        @keyframes blueCarEnterStage {
+            0% { left: -350px; transform: translateY(0px); }
+            30% { left: 150px; transform: translateY(0px); }
+            40% { left: 150px; transform: translateY(-3px); }
+            50% { left: 150px; transform: translateY(0px); }
+            60% { left: 150px; transform: translateY(-3px); }
+            70% { left: 150px; transform: translateY(0px); }
+            80% { left: 150px; transform: translateY(-3px); }
+            90% { left: 150px; transform: translateY(0px); }
+            100% { left: 150px; transform: translateY(0px); }
+        }
+
+        @keyframes car3ShowUp {
+            0%, 29.9% { opacity: 0.2; }
+            30%, 100% { opacity: 0.9; } 
+        }
+
+        /* 1s 閃爍時間軸 A：前 0.5s 顯示，後 0.5s 隱形 */
+        @keyframes flashImgA {
+            0%, 49.9% { opacity: 0.9; }
+            50%, 100% { opacity: 0.2; }
+        }
+
+        /* 1s 閃爍時間軸 B：與 A 完全相反 */
+        @keyframes flashImgB {
+            0%, 49.9% { opacity: 0.2; }
+            50%, 100% { opacity: 0.9; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 獨立靜態太陽 -->
+        <img src="sun.gif" class="static-sun" alt="原地太陽">
+
+        <!-- 修正 4：FLOWER 標籤已完全移除 -->
+
+        <!-- 紅色主角車 -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 藍色事件車 (後車 CAR2) -->
+        <img src="CAR2.gif" class="blue-car" alt="藍車後車">
+
+        <!-- 對向迴轉車 CAR3 事件群組 (修正大小、位置、閃爍速度) -->
+        <div class="car3-event-group">
+            <img src="CAR3.png" class="car3-side" alt="迴轉車側身">
+            <img src="CAR3_BACK.gif" class="car3-back" alt="迴轉車後視">
+        </div>
+
+        <!-- 修正 2：頂層房屋二棟 (放大比例並往右移動) -->
+        <img src="house.png" class="top-house house-1" alt="前景房屋A">
+        <img src="house.png" class="top-house house-2" alt="前景房屋B">
+    </div>
+
+</body>
+</html>
