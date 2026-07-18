@@ -109,23 +109,23 @@
             
             /* 0% ~ 20% (0s - 1.2s)：行駛至轉角 600px 處 */
             20% { 
-                left: 700px; 
+                left: 810px; 
                 transform: translateY(0px); 
                 opacity: 1; 
             }
             
             /* 20% ~ 35% (1.2s - 2.1s)：【壓縮】原地縮短停滯，進行怠速抖動 */
-            25% { left: 700px; transform: translateY(-3px); opacity: 1; }
-            30% { left: 700px; transform: translateY(0px); opacity: 1; }
+            25% { left: 810px; transform: translateY(-3px); opacity: 1; }
+            30% { left: 810px; transform: translateY(0px); opacity: 1; }
             35% { 
-                left: 700px; 
+                left: 810px; 
                 transform: translateY(0px); 
                 opacity: 1; 
             }
             
             /* 35.1% ~ 100% (2.1s 之後)：在第 2.1 秒瞬間隱形，舞台交接給後視車 */
             35.1%, 100% {
-                left: 700px;
+                left: 810px;
                 opacity: 0;
             }
         }
@@ -136,23 +136,23 @@
         @keyframes redCarBackSuccess {
             /* 0% ~ 35% (0s - 2.1s)：前段為側身行駛與停滯，後視圖層完全隱形 */
             0%, 34.9% {
-                left: 700px;    
-                bottom: 10px;
+                left: 850px;    
+                bottom: 20px;
                 opacity: 0;
-                transform: scale(1);
+                transform: scale(0.9);
             }
             
             /* 35% (2.1s 瞬間)：在路口中心接力顯現 */
             35% {
-                left: 700px;
-                bottom: 10px;
+                left: 850px;
+                bottom: 20px;
                 opacity: 1;
-                transform: scale(1);
+                transform: scale(0.9);
             }
             
             /* 80% ~ 100%：保持隱形定格 */
             100% {
-                left:1000px;
+                left:980px;
                 bottom: 250px;
                 opacity: 0.1;
                 transform: scale(0.35);
@@ -170,7 +170,7 @@
             
             /* 0% ~ 20% (0s - 1.2s)：行駛至轉角後方 440px 停下 */
             20% { 
-                left: 440px; 
+                left: 540px; 
                 transform: translateY(0px); 
             }
             
