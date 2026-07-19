@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>左轉事件場景 - 下半段（遊戲失敗）</title>
+    <title>緩停事件場景 - 下半段（遊戲失敗修正版）</title>
     <style>
-        /* 1. 遊戲視窗容器 (與上半段相同) */
+        /* 1. 遊戲視窗容器 */
         .game-viewport {
             width: 1000px;
             height: 400px;
@@ -16,13 +16,13 @@
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
             
-            background-image: url('右轉場景.png');
+            background-image: url('停止場景.png');
             background-size: 100% 100%; 
             background-repeat: no-repeat;
             z-index: 1;
         }
 
-        /* 2. 獨立太陽定位 (原地旋轉，靜止不動) */
+        /* 2. 獨立太陽定位 */
         .static-sun {
             position: absolute;
             top: -62px;      
@@ -33,69 +33,91 @@
             pointer-events: none;
         }
 
-        /* 3. 靜態花朵物件 (靜止不動) */
-        .scenery-flower {
+        /* 3. 頂層房屋二棟 (維持您的精確比例與右移坐標) */
+        .top-house {
             position: absolute;
-            width: 130px;    
+            width: 110px;       
             height: auto;
-            z-index: 1.5;   
+            bottom: -10px;      
+            z-index: 3;         
             pointer-events: none;
         }
-        .flower-left {
-            left: 30px;     
-            bottom: -50px;   
+        .house-1 {
+            left: 730px;
+        }
+        .house-2 {
+            left: 880px;
         }
 
-        .flower-middle {
-            left: 380px;     
-            bottom: -50px;   
-        }
-
-        .flower-right {
-            right: 130px;    
-            bottom: -50px;   
-        }
-
-        /* ==========================================
-           🛠️ 核心修正：紅色主角車定位與追撞動畫
-           ========================================== */
+        /* 4. 紅色主角車定位與動畫 */
         .player-car {
             position: absolute;
             width: 160px;       
             height: auto;       
-            bottom: -5px;       /* 你的貼地高度 */
+            bottom: -5px;       
             
-            /* 失敗場景總長度設定為 10s */
-            animation: redCarFailure 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: redCarSlowdownFailure 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2; 
         }
 
-        /* 5. 藍色追撞車定位與動畫 */
+        /* 5. 藍色後方來車定位與時間軸 (CAR2) */
         .blue-car {
             position: absolute;
-            width: 160px;
+            width: 160px;       
             height: auto;
             bottom: 15px;       
             
-            /* 與紅車完全同步播放 10 秒動畫 */
-            animation: blueCarFailure 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            /* ⚡【關鍵修正】：將動畫名稱由原先錯植的 blueCarEnterStage 修正為 blueCarCrashEvent 確保其衝刺前進 */
+            animation: blueCarCrashEvent 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2;
         }
 
-        /* 🟢 新增：爆炸特效定位 */
+        /* 6. 對向迴轉車 CAR3 大小縮小與定位群組 */
+        .car3-event-group {
+            position: absolute;
+            width: 110px;       
+            height: auto;
+            left: 740px;        
+            bottom: 70px;       
+            z-index: 1.8;       
+            opacity: 0;         
+            
+            animation: car3ShowUp 7s linear forwards;
+        }
+
+        .car3-event-group img {
+            position: absolute;
+            height: auto;
+            bottom: 0;
+        }
+
+        .car3-side {
+            width: 100%;
+            left: -90px;
+        }
+        .car3-side2 {
+            width: 100%;
+            left: 30px;
+        }
+        .car3-back {
+            width: 95px;       
+            left: 130px;         
+        }
+
+        /* 7. 爆炸特效定位 */
         .bomb-effect {
             position: absolute;
             width: 150px;       
             height: 180px;      /* 給予固定高寬 */
-            left: 640px;        
-            bottom: 15px;       
+            left: 470px;        
+            bottom: 35px;       
             
             animation: bombEffectFade 7s ease-out forwards;
             z-index: 3;         
             pointer-events: none;
         }
 
-        /* 🔵 新增：「遊戲失敗」標題定位 */
+        /* 8. 「遊戲失敗」標題定位 */
         .failure-banner {
             position: absolute;
             width: 200px;       /* 標題大小 */
@@ -112,61 +134,35 @@
         }
 
         /* ==========================================
-           6. 紅車（主角）失敗場景時間軸
+           9. 動態時間軸控制 (Keyframes)
            ========================================== */
-        @keyframes redCarFailure {
-            /* 0% ~ 30% (0s - 3s)：接續上半段，停滯原地怠速抖動 */
-            0% { left: 315px; transform: translateY(0px); }
-            
-            /* 30% ~ 60% (3s - 6s)：紅車出發，以滑順加速度走向轉角處 */
-            60% {
-                left: 650px;    /* 抵達轉角處定位點 */
-                transform: translateY(0px);
-            }
-            
-            /* 60% ~ 65% (6s - 6.5s)：碰撞瞬間，紅車被藍車撞擊車尾，產生微幅晃動 */
-            60.1% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
-            61% { left: 650px; transform: translate(0px, 0px) rotate(0deg); }
-            62% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
-            63% { left: 650px; transform: translate(0px, 0px) rotate(0deg); }
-            64% { left: 650px; transform: translate(2px, 1px) rotate(1deg); }
-            
-            /* 65% ~ 100% (6.5s - 10s)：定格失敗狀態 */
-            65%, 100% {
-                left: 650px;   /* 停滯在車禍位置 */
-                transform: translate(0px, 0px) rotate(0deg);
-            }
+        
+        /* 紅車時間軸 */
+        @keyframes redCarSlowdownFailure {
+            0% { left: 205px; transform: translateY(0px); }
+            45% { left: 500px; transform: translateY(0px); }
+            45.1%{ left: 505px; transform: translate(0px, 0px) rotate(0deg); }
+            45.5%{ left: 505px; transform: translate(0px, 0px) rotate(-10deg); }
+            46%,100%{ left: 505px; transform: translate(0px, 0px) rotate(0deg); }
         }
 
-        /* ==========================================
-           7. 藍車（追撞車）失敗場景時間軸
-           ========================================== */
-        @keyframes blueCarFailure {
-            /* 0% ~ 30% (0s - 3s)：同步在原地怠速抖動 */
-            0% { left: 150px; transform: translateY(0px); }
+        /* ⚡ 藍車（CAR2）衝刺與追撞時間軸 */
+        @keyframes blueCarCrashEvent {
+            0% { left: 50px; transform: translateY(0px); }
             
-            /* 30% ~ 60% (3s - 6s)：藍車踩油門猛烈衝刺，追撞紅車 */
-            60% {
-                left: 560px;    /* 撞擊瞬間位置：紅車650px - 藍車車頭長度160px 左右 */
-                transform: translateY(0px);
-            }
-            
-            /* 60% ~ 65% (6s - 6.5s)：碰撞瞬間，藍車車頭產生晃動 */
-            60.1% { left: 560px; transform: translate(-2px, 1px) rotate(-1deg); }
-            61% { left: 560px; transform: translate(0px, 0px) rotate(0deg); }
-            62% { left: 560px; transform: translate(-2px, 1px) rotate(-1deg); }
-            63% { left: 560px; transform: translate(0px, 0px) rotate(0deg); }
-            
-            /* 65% ~ 100% (6.5s - 10s)：定格車禍位置 */
-            65%, 100% {
-                left: 550px;   /* 停滯在碰撞位置 */
-                transform: translate(0px, 0px) rotate(0deg);
-            }
+            /* 30% 到 55%（第 2.1 秒到 3.85 秒）：從 150px 持續向前狂飆至 300px 進行追撞 */
+            45% { left: 400px; transform: translateY(0px); }
+            45.1%{ left: 390px; transform: translate(0px, 0px) rotate(0deg); }
+            45.5%{ left: 390px; transform: translate(0px, 0px) rotate(-10deg); }
+            46%,100%{ left: 390px; transform: translate(0px, 0px) rotate(0deg); }
         }
 
-        /* ==========================================
-           8. 爆炸特效淡入與晃動時間軸
-           ========================================== */
+        /* 堵車群組顯現軸 */
+        @keyframes car3ShowUp {
+            0%, 29.9% { opacity: 1; }
+            30%, 100% { opacity: 1; } 
+        }
+
         @keyframes bombEffectFade {
             /* 0% ~ 59.9%：完全不加載圖片，content 保持為空，瀏覽器在此期間不會下載或啟動 GIF */
             0%, 30% { 
@@ -176,28 +172,28 @@
             }
             
             /* 60% (撞擊發生瞬間)：這時才把 'BOMB.gif' 放進來，強迫瀏覽器從第 1 影格開始播放 */
-            31% {
+            40% {
                 content: url('BOMB.gif');
                 opacity: 1;
                 transform: scale(1.2) translate(-3px, 2px) rotate(-4deg);
             }
             /* 60% ~ 65%：爆炸煙霧震動 */
-            61.5% { transform: scale(1.15) translate(3px, -2px) rotate(4deg); }
-            63% { transform: scale(1.1) translate(-2px, 1px) rotate(-2deg); }
-            64.5% { transform: scale(1.05) translate(1px, -1px) rotate(1deg); }
+            51.5% { transform: scale(1.15) translate(3px, -2px) rotate(4deg); }
+            53% { transform: scale(1.1) translate(-2px, 1px) rotate(-2deg); }
+            54.5% { transform: scale(1.05) translate(1px, -1px) rotate(1deg); }
             
             /* 65% ~ 75%：爆炸播完，慢慢淡出隱形 */
-            65% {
+            55% {
                 opacity: 1;
                 transform: scale(1) translate(0px, 0px) rotate(0deg);
             }
-            75% {
+            65% {
                 opacity: 0;
                 transform: scale(0.8) translate(0, 10px) rotate(0deg);
                 content: url('BOMB.gif'); /* 保持圖片載入狀態完成淡出 */
             }
             /* 75.1% ~ 100%：淡出完畢後再次移除圖片，為下一次播放做準備 */
-            75.1%, 100% {
+            65.1%, 100% {
                 content: none;
                 opacity: 0;
             }
@@ -208,25 +204,25 @@
            ========================================== */
         @keyframes bannerFadeIn {
             /* 0% ~ 70% (特效淡出完成前)：隱形 */
-            0%, 44% {
+            0%, 50% {
                 opacity: 0;
                 transform: translate(-50%, -15px) scale(0.8); /* 從稍微上方、縮小淡入 */
             }
             
             /* 75% ~ 100% (場景最終定格)：完全顯現 */
-            45% {
+            51% {
                 opacity: 0.1;
                 transform: translate(-50%, 0) scale(1);
             }
-            50% {
+            56% {
                 opacity: 0.3;
                 transform: translate(-50%, 0) scale(1);
             }
-            55% {
+            60% {
                 opacity: 0.5;
                 transform: translate(-50%, 0) scale(1);
             }
-            60% {
+            65% {
                 opacity: 0.7;
                 transform: translate(-50%, 0) scale(1);
             }
@@ -246,19 +242,25 @@
         <!-- 獨立靜態太陽 -->
         <img src="sun.gif" class="static-sun" alt="原地太陽">
 
-        <!-- 靜態裝飾向日葵花叢 -->
-        <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
-        <img src="FLOWER.gif" class="scenery-flower flower-middle" alt="裝飾花朵">
-        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
-
-        <!-- 爆炸特效 (夾在中間) -->
-        <img src="BOMB.gif" class="bomb-effect" alt="爆炸特效">
-
-        <!-- 紅色主角車 (乾淨無裁切物件) -->
+        <!-- 紅色主角車 -->
         <img src="CAR.gif" class="player-car" alt="紅車主角">
 
-        <!-- 藍色追撞車 -->
-        <img src="CAR2.gif" class="blue-car" alt="藍車追撞">
+        <!-- 藍色事件車 (後車 CAR2) -->
+        <img src="CAR2.gif" class="blue-car" alt="藍車後車">
+
+        <!-- 對向迴轉堵車群組 (CAR3 & CAR4) -->
+        <div class="car3-event-group">
+            <img src="CAR3.png" class="car3-side" alt="迴轉車側身">
+            <img src="CAR4.png" class="car3-side2" alt="迴轉車側身">
+            <img src="CAR3_BACK.gif" class="car3-back" alt="迴轉車後視">
+        </div>
+
+        <!-- 頂層房屋二棟 -->
+        <img src="house.png" class="top-house house-1" alt="前景房屋A">
+        <img src="house.png" class="top-house house-2" alt="前景房屋B">
+
+        <!-- 爆炸特效容器 -->
+        <div class="bomb-effect"></div>
     </div>
 
 </body>
