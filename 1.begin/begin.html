@@ -22,13 +22,22 @@
             background-repeat: no-repeat;
             z-index: 1;
         }
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;     
+            width: 172px;   
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
 
         /* 2. 小車定位與滑順一鏡到底動畫 (中層) */
         .player-car {
             position: absolute;
-            width: 320px;  
+            width: 160px;  
             height: auto;
-            bottom: -10px; 
+            bottom: -5px; 
             
             /* 【優化】
                改用 cubic-bezier 自然慣性曲線，取代死板的 linear。
@@ -160,6 +169,9 @@
 <body>
 
     <div class="game-viewport">
+               <!-- 獨立靜態太陽 -->
+        <img src="SUN.gif" class="static-sun" alt="太陽">
+
         <img src="begin_font.png" class="start-banner" alt="開始遊戲">
 
         <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
