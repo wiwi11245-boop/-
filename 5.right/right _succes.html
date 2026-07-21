@@ -67,7 +67,7 @@
             bottom: -5px;       
             
             /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: redCarSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: redCarSuccess 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2; 
         }
 
@@ -81,7 +81,7 @@
             opacity: 0;         
             
             /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: redCarBackSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: redCarBackSuccess 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 1.8;       
         }
 
@@ -93,7 +93,7 @@
             bottom: 15px;       
             
             /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: blueCarSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: blueCarSuccess 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2;
         }
 
@@ -115,16 +115,11 @@
             }
             
             /* 20% ~ 35% (1.2s - 2.1s)：【壓縮】原地縮短停滯，進行怠速抖動 */
-            25% { left: 790px; transform: translateY(-3px); opacity: 1; }
-            30% { left: 790px; transform: translateY(0px); opacity: 1; }
-            35% { 
-                left: 790px; 
-                transform: translateY(0px); 
-                opacity: 1; 
-            }
+            21% { left: 790px; transform: translateY(-5px); opacity: 1; }
+            22% { left: 790px; transform: translateY(0px); opacity: 1; }
             
             /* 35.1% ~ 100% (2.1s 之後)：在第 2.1 秒瞬間隱形，舞台交接給後視車 */
-            35.1%, 100% {
+            22.1%, 100% {
                 left: 790px;
                 opacity: 0;
             }
@@ -135,7 +130,7 @@
            ========================================== */
         @keyframes redCarBackSuccess {
             /* 0% ~ 35% (0s - 2.1s)：前段為側身行駛與停滯，後視圖層完全隱形 */
-            0%, 34.9% {
+            0%, 22.1% {
                 left: 820px;    
                 bottom: 10px;
                 opacity: 0;
@@ -143,7 +138,7 @@
             }
             
             /* 35% (2.1s 瞬間)：在路口中心接力顯現 */
-            35% {
+            23% {
                 left: 820px;
                 bottom: 10px;
                 opacity: 1;
@@ -176,14 +171,12 @@
             
             /* 20% ~ 80% (1.2s - 4.8s)：【跟隨停滯】在原地抖動等待。
                這段期間紅車會在 35% 出發左轉，藍車依然在原地等待，直至紅車於 80% 完全淡出消失 */
+            21% { left: 540px; transform: translateY(-3px); }
+            23% { left: 540px; transform: translateY(0px); }
             25% { left: 540px; transform: translateY(-3px); }
-            30% { left: 540px; transform: translateY(0px); }
-            35% { left: 540px; transform: translateY(-3px); }
-            40% { left: 540px; transform: translateY(0px); }
-            45% { left: 540px; transform: translateY(-3px); }
-            50% { left: 540px; transform: translateY(0px); }
-            55% { left: 540px; transform: translateY(-3px); }
-            65% { 
+            27% { left: 540px; transform: translateY(0px); }
+            29% { left: 540px; transform: translateY(-3px); }
+            30% { 
                 left: 540px; 
                 transform: translateY(0px); 
             }

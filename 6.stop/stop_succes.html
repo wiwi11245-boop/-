@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>左轉事件場景 - 下半段（成功左轉完美節奏版）</title>
+    <title>緩停事件場景 - 下半段（任務成功視覺分層版）</title>
     <style>
         /* 1. 遊戲視窗容器 */
         .game-viewport {
@@ -16,7 +16,7 @@
             border-radius: 12px;
             box-shadow: 0 15px 30px rgba(0,0,0,0.3);
             
-            background-image: url('右轉場景.png');
+            background-image: url('停止場景.png');
             background-size: 100% 100%; 
             background-repeat: no-repeat;
             z-index: 1;
@@ -33,166 +33,151 @@
             pointer-events: none;
         }
 
-        /* 3. 靜態花朵物件 */
-        .scenery-flower {
+        /* 3. 頂層房屋二棟 (維持專案精確比例與位置) */
+        .top-house {
             position: absolute;
-            width: 130px;    
+            width: 110px;       
             height: auto;
-            z-index: 1.5;   
+            bottom: -10px;      
+            z-index: 3;         
             pointer-events: none;
         }
-        .flower-left {
-            left: 30px;     
-            bottom: -50px;   
-        }
+        .house-1 { left: 730px; }
+        .house-2 { left: 880px; }
 
-        .flower-middle {
-            left: 380px;     
-            bottom: -50px;   
-        }
-
-        .flower-right {
-            right: 130px;    
-            bottom: -50px;   
-        }
-
-        /* ==========================================
-           4. 紅色主角車定位與成功左轉動畫
-           ========================================== */
-        /* 側身紅車 (Side view) */
+        /* 4. 紅色主角車定位與動畫 */
         .player-car {
             position: absolute;
             width: 160px;       
             height: auto;       
             bottom: -5px;       
             
-            /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: redCarSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: redCarSuccessDrive 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2; 
         }
 
-        /* 後視紅車 (Back view) */
-        .player-car-back {
-            position: absolute;
-            width: 120px;       
-            height: auto;       
-            bottom: 10px;       
-            left: 650px;
-            opacity: 0;         
-            
-            /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: redCarBackSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            z-index: 1.8;       
-        }
-
-        /* 5. 藍色直行車定位與動畫 */
+        /* 5. 藍色後方來車定位與動畫 (CAR2) */
         .blue-car {
             position: absolute;
-            width: 160px;
+            width: 160px;       
             height: auto;
             bottom: 15px;       
             
-            /* 【優化】總時間改短為 6 秒 (6s) */
-            animation: blueCarSuccess 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: blueCarSuccessDrive 6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             z-index: 2;
         }
 
-        /* ==========================================
-           6. 側身紅車動畫時間軸
-           ========================================== */
-        @keyframes redCarSuccess {
-            0% { 
-                left: 315px; 
-                transform: translateY(0px); 
-                opacity: 1; 
-            }
-            
-            /* 0% ~ 20% (0s - 1.2s)：行駛至轉角 600px 處 */
-            20% { 
-                left: 790px; 
-                transform: translateY(0px); 
-                opacity: 1; 
-            }
-            
-            /* 20% ~ 35% (1.2s - 2.1s)：【壓縮】原地縮短停滯，進行怠速抖動 */
-            25% { left: 790px; transform: translateY(-3px); opacity: 1; }
-            30% { left: 790px; transform: translateY(0px); opacity: 1; }
-            35% { 
-                left: 790px; 
-                transform: translateY(0px); 
-                opacity: 1; 
-            }
-            
-            /* 35.1% ~ 100% (2.1s 之後)：在第 2.1 秒瞬間隱形，舞台交接給後視車 */
-            35.1%, 100% {
-                left: 790px;
-                opacity: 0;
-            }
+        /* 6. 對向迴轉堵車群組基本容器 */
+        .car3-event-group {
+            position: absolute;
+            width: 110px;       
+            height: auto;
+            left: 740px;        
+            bottom: 70px;       
+            z-index: 1.8;       
+        }
+
+        .car3-event-group img {
+            position: absolute;
+            height: auto;
+            bottom: 0;
+        }
+
+        /* 🛠️ 階段 B 消失：中央兩輛車 (CAR3 與 CAR4) */
+        .car3-side {
+            width: 100%;
+            left: -90px;
+            animation: car3SidesFade 6s linear forwards;
+        }
+        .car3-side2 {
+            width: 100%;
+            left: 30px;
+            animation: car3SidesFade 6s linear forwards;
+        }
+
+        /* 🛠️ 階段 A 率先消失：右側 CAR3_BACK */
+        .car3-back {
+            width: 95px;       
+            left: 130px;         
+            animation: car3BackFade 6s linear forwards;
+        }
+
+        /* 🛠️ 階段 C 浮現：CAR5 採用您指定的精確定位與尺寸 */
+        .car5-parked {
+            position: absolute;
+            width: 110px;       /* 與 CAR4 比例完全一致 */
+            height: auto;
+            left: 790px;        /* 您的微調位置 */
+            bottom: 140px;      /* 您的微調位置 */
+            z-index: 1.9;       
+            opacity: 0;         /* 初始隱形，隨後淡入浮現 */
+            pointer-events: none;
+
+            animation: car5FadeIn 6s linear forwards;
         }
 
         /* ==========================================
-           7. 後視紅車（CAR_BACK）左轉深入背景時間軸
+           7. 動態時間軸控制 (Keyframes)
            ========================================== */
-        @keyframes redCarBackSuccess {
-            /* 0% ~ 35% (0s - 2.1s)：前段為側身行駛與停滯，後視圖層完全隱形 */
-            0%, 34.9% {
-                left: 820px;    
-                bottom: 10px;
-                opacity: 0;
-                transform: scale(1.2);
-            }
+        
+        /* 🛠️ 紅車（主角）：後拉 30px，緩停位置改為 470px */
+        @keyframes redCarSuccessDrive {
+            0% { left: 205px; transform: translateY(0px); }
             
-            /* 35% (2.1s 瞬間)：在路口中心接力顯現 */
-            35% {
-                left: 820px;
-                bottom: 10px;
-                opacity: 1;
-                transform: scale(1.2);
-            }
+            /* 35% (1.5s)：抵達 470px 處 (後拉 30px，不碰到前方車尾) */
+            35% { left: 470px; transform: translateY(0px); }
             
-            /* 80% ~ 100%：保持隱形定格 */
-            100% {
-                left:820px;
-                bottom: -150px;
-                opacity: 0.3;
-                transform: scale(1.2);
+            /* 35% ~ 40% (1.5s - 2.0s)：10% 緩停怠速抖動 */
+            35.1% { left: 470px; transform: translateY(-3px); }
+            40% { left: 470px; transform: translateY(0px); }
+            
+            /* 40% ~ 60% (2.0s - 3.0s)：原地等待對向堵車散去與 CAR5 停妥 */
+            60% { left: 470px; transform: translateY(0px); }
+            
+            /* 60% ~ 100% (3.0s - 5.0s)：路口暢通，全速衝出右側邊界 */
+            100% { 
+                left: 1100px; 
+                transform: translateY(0px); 
             }
         }
 
-        /* ==========================================
-           8. 藍車直行穿過路口直至右側消失時間軸
-           ========================================== */
-        @keyframes blueCarSuccess {
-            0% { 
-                left: 150px; 
+        /* 🛠️ 藍車（CAR2）：後拉 30px，緩停位置改為 370px */
+        @keyframes blueCarSuccessDrive {
+            0% { left: 50px; transform: translateY(0px); }
+            
+            /* 35% (1.5s)：抵達 370px 處 (後拉 30px) */
+            35% { left: 370px; transform: translateY(0px); }
+            
+            /* 35.1% ~ 40% (1.5s - 2.0s)：10% 緩停怠速抖動 */
+            35.1% { left: 370px; transform: translateY(-3px); }
+            40% { left: 370px; transform: translateY(0px); }
+            
+            /* 40% ~ 60% (2.0s - 3.0s)：等待紅車起步 */
+            60% { left: 370px; transform: translateY(0px); }
+            
+            /* 60% ~ 100% (3.0s - 5.0s)：跟隨紅車全速衝出右側邊界 */
+            100% { 
+                left: 1100px; 
                 transform: translateY(0px); 
             }
-            
-            /* 0% ~ 20% (0s - 1.2s)：行駛至轉角後方 440px 停下 */
-            20% { 
-                left: 540px; 
-                transform: translateY(0px); 
-            }
-            
-            /* 20% ~ 80% (1.2s - 4.8s)：【跟隨停滯】在原地抖動等待。
-               這段期間紅車會在 35% 出發左轉，藍車依然在原地等待，直至紅車於 80% 完全淡出消失 */
-            25% { left: 540px; transform: translateY(-3px); }
-            30% { left: 540px; transform: translateY(0px); }
-            35% { left: 540px; transform: translateY(-3px); }
-            40% { left: 540px; transform: translateY(0px); }
-            45% { left: 540px; transform: translateY(-3px); }
-            50% { left: 540px; transform: translateY(0px); }
-            55% { left: 540px; transform: translateY(-3px); }
-            65% { 
-                left: 540px; 
-                transform: translateY(0px); 
-            }
-            
-            /* 80% ~ 100% (4.8s - 6.0s)：【保持原有直行速度】隨後起步，在 1.2 秒內迅速衝出右側畫面消失 */
-            100% {
-                left: 1100px;   
-                transform: translateY(0px);
-            }
+        }
+
+        /* 🛠️ 階段 A：CAR3_BACK 率先於 40% ~ 48% 淡出消失 */
+        @keyframes car3BackFade {
+            0%, 38% { opacity: 1; }
+            40%, 100% { opacity: 0; }
+        }
+
+        /* 🛠️ 階段 B：CAR3 & CAR4 緊著於 48% ~ 56% 淡出消失 */
+        @keyframes car3SidesFade {
+            0%, 48% { opacity: 1; }
+            56%, 100% { opacity: 0; }
+        }
+
+        /* 🛠️ 階段 C：CAR5 於 50% ~ 60% 漸漸浮現並保持至最後一影格 */
+        @keyframes car5FadeIn {
+            0%, 50% { opacity: 0; }
+            60%, 100% { opacity: 1; }
         }
     </style>
 </head>
@@ -202,19 +187,25 @@
         <!-- 獨立靜態太陽 -->
         <img src="sun.gif" class="static-sun" alt="原地太陽">
 
-        <!-- 靜態裝飾向日葵花叢 -->
-        <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
-        <img src="FLOWER.gif" class="scenery-flower flower-middle" alt="裝飾花朵">
-        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
+        <!-- 紅色主角車 (起點 205px -> 緩停 470px) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
 
-        <!-- 紅色主角車 - 側身 (z-index: 2) -->
-        <img src="CAR.gif" class="player-car" alt="紅車主角側身">
+        <!-- 藍色事件車 (後車 CAR2，起點 50px -> 緩停 370px) -->
+        <img src="CAR2.gif" class="blue-car" alt="藍車後車">
 
-        <!-- 紅色主角車 - 後視 (z-index: 1.8，左轉時登場) -->
-        <img src="CAR_FORWARD.gif" class="player-car-back" alt="紅車主角後視">
+        <!-- 對向迴轉堵車群組 (內部獨立分階段淡出) -->
+        <div class="car3-event-group">
+            <img src="CAR3.png" class="car3-side" alt="迴轉車側身CAR3">
+            <img src="CAR4.png" class="car3-side2" alt="迴轉車側身CAR4">
+            <img src="CAR3_BACK.gif" class="car3-back" alt="迴轉車後視">
+        </div>
 
-        <!-- 藍色直行車 -->
-        <img src="CAR2.gif" class="blue-car" alt="藍車直行">
+        <!-- CAR5 轉向車 (於 50%~60% 浮現，定格在 left: 790px, bottom: 140px) -->
+        <img src="CAR5.png" class="car5-parked" alt="停至商店前 CAR5">
+
+        <!-- 頂層房屋二棟 -->
+        <img src="house.png" class="top-house house-1" alt="前景房屋A">
+        <img src="house.png" class="top-house house-2" alt="前景房屋B">
     </div>
 
 </body>
