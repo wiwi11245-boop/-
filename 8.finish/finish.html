@@ -42,7 +42,7 @@
             position: absolute;
             width: 200px;       
             height: auto;       
-            bottom: -5px;       
+            bottom: 75px;       
             z-index: 2;
             opacity: 1;
             
@@ -52,10 +52,10 @@
         /* 影格二：轉向後視視角 (CAR_BACK.png) */
         .car-frame2 {
             position: absolute;
-            width: 110px;       
+            width: 80px;       
             height: auto;       
-            left: 550px;        
-            bottom: 80px;       
+            left: 900px;        
+            bottom: 70px;       
             z-index: 2;
             opacity: 0;         
             
@@ -65,10 +65,10 @@
         /* 影格三：開燈停妥在修車廠平台 (CAR_finish2.png) */
         .car-frame3 {
             position: absolute;
-            width: 250px;       
+            width: 200px;       
             height: auto;       
-            left: 610px;        
-            bottom: 110px;       
+            left: 770px;        
+            bottom: 160px;       
             z-index: 2;
             opacity: 0;         
             
@@ -83,7 +83,7 @@
             left: 0;
             top: 0;
             background-color: #111118; 
-            z-index: 3;         
+            z-index: 4;         
             pointer-events: none;
             opacity: 0;
             
@@ -104,6 +104,25 @@
             
             animation: thanksFadeIn 8s ease-out forwards;
         }
+        .foreground-mountain {
+             position: absolute;
+    
+             /* ==========================================
+              👇 調整這裡的數值，直接對準背景的小溪木橋！
+            ========================================== */
+            width: 1000px;       /* 1. 調整寬度，使其與背景木橋上的欄杆等寬 */
+            height: 400px;       /* 2. 調整高度，使其符合欄杆比例 */
+            bottom: 17px;       /* 4. 調整 Y 軸，往上或往下移動，直到完美遮住車輪 */
+    
+            background-image: url('mountain.png');
+            background-size: contain; /* 確保圖片不變形地縮放在這個框框裡 */
+            background-position: center;
+            background-repeat: no-repeat;
+    
+            z-index: 3; /* 壓在車子(z-index: 2)最前方 */
+            pointer-events: none; 
+
+}
 
         /* ==========================================
            6. 動態時間軸控制 (Keyframes)
@@ -112,29 +131,29 @@
         /* 影格一 (CAR_finish.png)：0%~35% 駛入，35%~45% 漸漸淡出 */
         @keyframes parkStage1 {
             0% { left: -250px; opacity: 1; }
-            35% { left: 480px; opacity: 1; }      
-            45%, 100% { left: 480px; opacity: 0; }
+            45% { left: 800px; opacity: 1; }      
+            45.5%, 100% { left: 800px; opacity: 0; }
         }
 
         /* 影格二 (CAR_BACK.png)：35%~45% 淡入，45%~55% 顯示，55%~65% 淡出 */
         @keyframes parkStage2 {
-            0%, 35% { opacity: 0; }
-            45%, 55% { opacity: 1; }              
-            65%, 100% { opacity: 0; }             
+            0%, 46% { opacity: 0; }
+            47%{bottom: 60px; opacity: 1;}
+            55% {bottom: 90px; opacity: 1; }              
+            60%, 100% { opacity: 0; }             
         }
 
         /* 影格三 (CAR_finish2.png)：55%~65% 淡入，65%~100% 保持顯示 */
         @keyframes parkStage3 {
-            0%, 55% { opacity: 0; transform: translateY(0px); }
+            0%, 61% { opacity: 0; transform: translateY(0px); }
             65% { opacity: 1; transform: translateY(0px); } 
-            75% { opacity: 1; transform: translateY(-2px); }
-            85%, 100% { opacity: 1; transform: translateY(0px); }
+            65.1%, 100% { opacity: 1; transform: translateY(0px); }
         }
 
         /* 太陽落山時間軸 */
         @keyframes sunSunset {
             0% { left: 98px; top: -62px; opacity: 1; }
-            65%, 100% { left: 220px; top: 100px; opacity: 0.2; }
+            65%, 100% { left: 98px; top: -30px; opacity: 0.2; }
         }
 
         /* 🛠️【核心修正】天黑變暗延後至 65% 才開始啟動 (第 5.2 秒) */
@@ -174,6 +193,8 @@
 
         <!-- 單次天黑遮罩 (65% 開始變暗) -->
         <div class="dark-overlay"></div>
+
+        <div class="foreground-mountain"></div>
 
         <!-- 結尾標題 (感謝遊玩.png) -->
         <img src="感謝遊玩.png" class="thanks-banner" alt="感謝遊玩標題">
