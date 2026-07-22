@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>常規行車場景 - CSS 捲軸</title>
+    <title>常規行車場景 - 素材拆分獨立定位版</title>
     <style>
         /* 1. 遊戲視窗容器 */
         .game-viewport {
@@ -21,8 +21,9 @@
             background-size: auto 100%; /* 高度撐滿，寬度等比例 */
             background-repeat: repeat-x; /* 水平無限重複 */
             
-            /* 觸發背景向左捲動動畫（12秒循環一次，線性無縫，無限循環） */
+            /* 觸發背景向左捲動動畫（5秒循環一次，線性無縫，無限循環） */
             animation: scrollBackground 5s linear infinite;
+            z-index: 1;
         }
 
         /* 2. 背景往左捲動的關鍵影格 */
@@ -31,27 +32,35 @@
                 background-position: 0 0;
             }
             to {
-                /* 往左移動一個完整背景圖寬度的距離以達成無縫銜接 */
                 background-position: -1000px 0; 
             }
         }
 
-        /* 3. 小車定位與上下抖動動畫 */
+        /* 3. 獨立太陽定位 (對齊其他場景的標準尺寸與坐標) */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   /* 夾在背景與車子中間 */
+            pointer-events: none;
+        }
+
+        /* 4. 乾淨主角紅車定位與抖動動畫 (對齊其他場景的標準尺寸與坐標) */
         .player-car {
             position: absolute;
-            width: 320px;  /* 依據你的素材比例調整 */
+            width: 160px;       /* 標準小車比例 */
             height: auto;
-            
-            /* 台灣靠右行駛定位：
-               車頭朝右，故車子放在畫面的下車道（偏右側車道在畫面中看起來是靠下側） */
-            left: 50px; 
-            bottom: -10px; /* 貼近下車道 */
+            left: 315px;        /* 標準常規行駛位置 */
+            bottom: -5px;       /* 貼合車道高低比例 */
+            z-index: 2; 
             
             /* 微幅抖動，模擬引擎與路面起伏（0.8秒一個循環，上下抖動） */
             animation: carVibration 0.8s ease-in-out infinite alternate;
         }
 
-        /* 4. 小車抖動的關鍵影格 */
+        /* 5. 小車抖動的關鍵影格 */
         @keyframes carVibration {
             from {
                 transform: translateY(0px);
@@ -65,7 +74,11 @@
 <body>
 
     <div class="game-viewport">
-        <img src="CAR.gif" class="player-car" alt="行駛小車">
+        <!-- 獨立靜態太陽 -->
+        <img src="sun.gif" class="static-sun" alt="太陽">
+
+        <!-- 乾淨主角紅車 -->
+        <img src="CAR.gif" class="player-car" alt="行駛主角車">
     </div>
 
 </body>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>允讓後車事件 - 前半段動態滾動版</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入背景，設定水平重複 */
+            background-image: url('background.png');
+            background-size: auto 100%; 
+            background-repeat: repeat-x; 
+            
+            /* 背景持續向左捲動動畫 (5s 線性無限循環) */
+            animation: scrollBackground 5s linear infinite;
+            z-index: 1;
+        }
+
+        /* 背景往左捲動關鍵影格 */
+        @keyframes scrollBackground {
+            from { background-position: 0 0; }
+            to { background-position: -1000px 0; }
+        }
+
+        /* 2. 獨立太陽定位 */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 3. 後方黑車 (ANGRY_CAR.gif) 定位與駛入動畫 */
+        .angry-car {
+            position: absolute;
+            width: 255px;       
+            height: auto;       
+            bottom: 65px;       
+            
+            animation: angryCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 4. 主角紅車 (CAR.gif) 定位與駛入動畫 */
+        .player-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: -5px;       
+            
+            animation: redCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* ==========================================
+           5. 對向車道來車 (CAR2.gif 鏡像翻轉並快速向左駛過)
+           ========================================== */
+        .opposite-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: 60px;       
+            z-index: 1.8;       
+            
+            /* 鏡像翻轉：將原本朝右的 CAR2.gif 水平翻轉為朝左 */
+            transform: scaleX(-1);
+        }
+
+        /* 第一輛對向車 */
+        .opposite-car-1 {
+            animation: oppositeCarDriveFast 3.5s linear infinite;
+            animation-delay: 0.5s; 
+        }
+
+        /* 第二輛對向車 */
+        .opposite-car-2 {
+            animation: oppositeCarDriveFast 3.5s linear infinite;
+            animation-delay: 2.2s; 
+        }
+
+        /* ==========================================
+           6. 動態時間軸控制 (Keyframes)
+           ========================================== */
+
+        /* 怒氣黑車：從左側邊界外 -350px 滑入至 150px 處怠速 */
+        @keyframes angryCarEnterStage {
+            0% { left: -350px; transform: translateY(0px); }
+            30% { left: 150px; transform: translateY(0px); }
+            /* 30% ~ 100% 原地怠速抖動 */
+            40% { left: 150px; transform: translateY(-3px); }
+            50% { left: 150px; transform: translateY(0px); }
+            60% { left: 150px; transform: translateY(-3px); }
+            70% { left: 150px; transform: translateY(0px); }
+            80% { left: 150px; transform: translateY(-3px); }
+            90%, 100% { left: 150px; transform: translateY(0px); }
+        }
+
+        /* 主角紅車：從左側邊界外 -200px 滑入至 315px 處怠速 */
+        @keyframes redCarEnterStage {
+            0% { left: -200px; transform: translateY(0px); }
+            30% { left: 315px; transform: translateY(0px); }
+            /* 30% ~ 100% 原地怠速抖動 */
+            40% { left: 315px; transform: translateY(-3px); }
+            50% { left: 315px; transform: translateY(0px); }
+            60% { left: 315px; transform: translateY(-3px); }
+            70% { left: 315px; transform: translateY(0px); }
+            80% { left: 315px; transform: translateY(-3px); }
+            90%, 100% { left: 315px; transform: translateY(0px); }
+        }
+
+        /* 🛠️【修改重點】對向車極速駛過時間軸：頭尾 opacity 皆設定為 0.5 */
+        @keyframes oppositeCarDriveFast {
+            0% { 
+                left: 1100px; 
+                opacity: 0.1; /* 頭部：0.5 半透明 */
+                transform: scaleX(-1) translateY(0px); 
+            }
+            50% {
+                opacity: 1;   /* 中央：1 完全不透明 */
+                transform: scaleX(-1) translateY(-2px); 
+            }
+            100% { 
+                left: -300px; 
+                opacity: 0.1; /* 尾部：0.5 半透明 */
+                transform: scaleX(-1) translateY(0px); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 太陽 (sun.gif) -->
+        <img src="sun.gif" class="static-sun" alt="太陽">
+
+        <!-- 後方怒氣黑車 (ANGRY_CAR.gif) -->
+        <img src="ANGRY_CAR.gif" class="angry-car" alt="怒氣後車">
+
+        <!-- 主角紅車 (CAR.gif) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 對向來車一 -->
+        <img src="CAR2.gif" class="opposite-car opposite-car-1" alt="對向來車1">
+
+        <!-- 對向來車二 -->
+        <img src="CAR2.gif" class="opposite-car opposite-car-2" alt="對向來車2">
+    </div>
+
+</body>
+</html>

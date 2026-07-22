@@ -30,11 +30,11 @@
             z-index: 1.5;   
             pointer-events: none;
             
-            animation: sunSunset 8s ease-in-out forwards;
+            animation: sunSunset 10s ease-in-out forwards;
         }
 
         /* ==========================================
-           3. 三階段主角車圖層定位與動畫
+           3. 四階段主角車圖層定位與動畫
            ========================================== */
         
         /* 影格一：側身開至車庫下方 (CAR_finish.png) */
@@ -46,7 +46,7 @@
             z-index: 2;
             opacity: 1;
             
-            animation: parkStage1 8s cubic-bezier(0.1, 0.85, 0.35, 1) forwards;
+            animation: parkStage1 10s cubic-bezier(0.1, 0.85, 0.35, 1) forwards;
         }
 
         /* 影格二：轉向後視視角 (CAR_BACK.png) */
@@ -59,7 +59,7 @@
             z-index: 2;
             opacity: 0;         
             
-            animation: parkStage2 8s linear forwards;
+            animation: parkStage2 10s linear forwards;
         }
 
         /* 影格三：開燈停妥在修車廠平台 (CAR_finish2.png) */
@@ -72,7 +72,20 @@
             z-index: 2;
             opacity: 0;         
             
-            animation: parkStage3 8s linear forwards;
+            animation: parkStage3 10s linear forwards;
+        }
+
+        /* 🛠️ 影格四：熄燈車輛定位在同個位置 (CAR_finish3.png) */
+        .car-frame4 {
+            position: absolute;
+            width: 127px;       /* 比例位置與 car-frame3 完全一致 */
+            height: auto;       
+            left: 843px;        
+            bottom: 160px;       
+            z-index: 3;
+            opacity: 0;         /* 預設隱形 */
+            
+            animation: parkStage4 10s linear forwards;
         }
 
         /* 4. 單次天黑遮罩 */
@@ -87,7 +100,7 @@
             pointer-events: none;
             opacity: 0;
             
-            animation: smoothDarkenOnce 8s ease-out forwards;
+            animation: smoothDarkenOnce 10s ease-out forwards;
         }
 
         /* 5. 「感謝遊玩」結尾標題 */
@@ -102,27 +115,23 @@
             pointer-events: none;
             opacity: 0;         
             
-            animation: thanksFadeIn 8s ease-out forwards;
+            animation: thanksFadeIn 10s ease-out forwards;
         }
+
         .foreground-mountain {
-             position: absolute;
-    
-             /* ==========================================
-              👇 調整這裡的數值，直接對準背景的小溪木橋！
-            ========================================== */
-            width: 1000px;       /* 1. 調整寬度，使其與背景木橋上的欄杆等寬 */
-            height: 400px;       /* 2. 調整高度，使其符合欄杆比例 */
-            bottom: 17px;       /* 4. 調整 Y 軸，往上或往下移動，直到完美遮住車輪 */
+            position: absolute;
+            width: 1000px;       
+            height: 400px;       
+            bottom: 17px;       
     
             background-image: url('mountain.png');
-            background-size: contain; /* 確保圖片不變形地縮放在這個框框裡 */
+            background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
     
             z-index: 3; /* 壓在車子(z-index: 2)最前方 */
             pointer-events: none; 
-
-}
+        }
 
         /* ==========================================
            6. 動態時間軸控制 (Keyframes)
@@ -131,23 +140,29 @@
         /* 影格一 (CAR_finish.png)：0%~35% 駛入，35%~45% 漸漸淡出 */
         @keyframes parkStage1 {
             0% { left: -250px; opacity: 1; }
-            45% { left: 800px; opacity: 1; }      
-            45.5%, 100% { left: 800px; opacity: 0; }
+            40% { left: 800px; opacity: 1; }      
+            40.5%, 100% { left: 800px; opacity: 0; }
         }
 
-        /* 影格二 (CAR_BACK.png)：35%~45% 淡入，45%~55% 顯示，55%~65% 淡出 */
+        /* 影格二 (CAR_BACK.png)：46% 淡入，55% 爬升，60% 淡出 */
         @keyframes parkStage2 {
-            0%, 46% { opacity: 0; }
-            47%{bottom: 60px; opacity: 1;}
-            55% {bottom: 90px; opacity: 1; }              
-            60%, 100% { opacity: 0; }             
+            0%, 41% { opacity: 0; }
+            42% { bottom: 60px; opacity: 1; }
+            50% { bottom: 90px; opacity: 1; }              
+            51%, 100% { opacity: 0; }             
         }
 
-        /* 影格三 (CAR_finish2.png)：55%~65% 淡入，65%~100% 保持顯示 */
+        /* 🛠️ 影格三 (CAR_finish2.png)：65% 顯現開燈車，75%~78% 熄燈淡出 */
         @keyframes parkStage3 {
-            0%, 61% { opacity: 0; transform: translateY(0px); }
-            65% { opacity: 1; transform: translateY(0px); } 
-            65.1%, 100% { opacity: 1; transform: translateY(0px); }
+            0%, 53% { opacity: 0; transform: translateY(0px); }
+            55%, 60% { opacity: 1; transform: translateY(0px); } 
+            65%, 100% { opacity: 0; transform: translateY(0px); } /* 75%~78% 關燈淡出 */
+        }
+
+        /* 🛠️ 影格四 (CAR_finish3.png)：75%~78% 接力顯現熄燈車，並定格至結束 */
+        @keyframes parkStage4 {
+            0%, 55% { opacity: 0; transform: translateY(0px); }
+            60%, 100% { opacity: 1; transform: translateY(0px); } /* 78% 後持續顯示 */
         }
 
         /* 太陽落山時間軸 */
@@ -156,17 +171,11 @@
             65%, 100% { left: 98px; top: -30px; opacity: 0.2; }
         }
 
-        /* 🛠️【核心修正】天黑變暗延後至 65% 才開始啟動 (第 5.2 秒) */
+        /* 天黑變暗延後至 65% 才開始啟動 (第 5.2 秒) */
         @keyframes smoothDarkenOnce {
-            0%, 64.9% { 
-                opacity: 0; 
-            }
-            65% { 
-                opacity: 0.2; 
-            }
-            80%, 100% { 
-                opacity: 0.85; 
-            }
+            0%, 64% { opacity: 0; }
+            65% { opacity: 0.2; }
+            80%, 100% { opacity: 0.85; }
         }
 
         /* 「感謝遊玩」結尾標題：天黑後滑順淡入 */
@@ -190,6 +199,9 @@
 
         <!-- 影格三：開燈停妥 (CAR_finish2.png) -->
         <img src="CAR_finish2.png" class="car-frame3" alt="第三影格停妥車">
+
+        <!-- 🛠️ 影格四：熄燈停妥 (CAR_finish3.png) -->
+        <img src="CAR_finish3.png" class="car-frame4" alt="第四影格熄燈車">
 
         <!-- 單次天黑遮罩 (65% 開始變暗) -->
         <div class="dark-overlay"></div>
