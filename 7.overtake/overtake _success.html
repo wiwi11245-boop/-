@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>允讓後車事件 - 任務成功（黑車順利超車版）</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入背景，設定水平重複 */
+            background-image: url('background.png');
+            background-size: auto 100%; 
+            background-repeat: repeat-x; 
+            
+            /* 🛠️ 背景持續向左無縫捲動 (7s 線性無限循環) */
+            animation: scrollBackground 7s linear infinite;
+            z-index: 1;
+        }
+
+        /* 背景往左捲動關鍵影格 */
+        @keyframes scrollBackground {
+            from { background-position: 0 0; }
+            to { background-position: -1400px 0; }
+        }
+
+        /* 2. 獨立太陽定位 */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 🛠️ 3. 後方黑車 (ANGRY_CAR.gif) 成功超車駛離動畫 (7s) */
+        .angry-car {
+            position: absolute;
+            width: 255px;       
+            height: auto;       
+            bottom: 65px;       
+            
+            animation: angryCarSuccessOvertake 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 4. 主角紅車 (CAR.gif) 正常行駛怠速動畫 (7s) */
+        .player-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: -5px;       
+            
+            animation: redCarKeepDriving 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 🛠️ 5. 對向藍車 (CAR2.gif)：直接走到底離去，不相撞 */
+        .opposite-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: 60px;       
+            z-index: 1.8;       
+            
+            transform: scaleX(-1); /* 鏡像翻轉車頭朝左 */
+            
+            animation: oppositeCarPass 7s linear forwards;
+        }
+
+        /* ==========================================
+           6. 動態時間軸控制 (Keyframes)
+           ========================================== */
+
+        /* 🛠️ 黑車成功超車時間軸 */
+        @keyframes angryCarSuccessOvertake {
+            0%, 20% { 
+                left: 150px; 
+                bottom: 65px; 
+                transform: rotate(0deg); 
+            }
+            
+            /* 25% ~ 55% (1.25s - 2.75s)：等待對向藍車通過後，切入對向車道並超越紅車 */
+            45% { 
+                left: 150px; 
+                bottom: 105px; 
+                transform: rotate(-3deg); 
+            }
+            65% { 
+                left: 450px; 
+                bottom: 105px; 
+                transform: rotate(0deg); 
+            }
+            
+            /* 55% ~ 100% (2.75s - 5.0s)：切回主車道並極速駛出右側畫面 */
+            75% { 
+                left: 450px; 
+                bottom: 65px; 
+                transform: rotate(3deg); 
+            }
+            100% { 
+                left: 1100px; 
+                bottom: 65px; 
+                transform: rotate(0deg); 
+            }
+        }
+
+        /* 🛠️ 主角紅車時間軸：保持在原車道怠速行駛 */
+        @keyframes redCarKeepDriving {
+            0%, 100% { left: 315px; transform: translateY(0px); }
+            20% { left: 315px; transform: translateY(-3px); }
+            40% { left: 315px; transform: translateY(0px); }
+            60% { left: 315px; transform: translateY(-3px); }
+            80% { left: 315px; transform: translateY(0px); }
+        }
+
+        /* 🛠️ 對向藍車時間軸：直接向左駛過離去 (0% ~ 50% 走到底) */
+        @keyframes oppositeCarPass {
+            0% { 
+                left: 1100px; 
+                opacity: 0.1;
+                transform: scaleX(-1) translateY(0px); 
+            }
+            20% {
+                opacity: 1;
+                transform: scaleX(-1) translateY(-2px); 
+            }
+            /* 50% (第 2.5 秒)：完全駛出左側視窗 */
+            50%, 100% { 
+                left: -1000px; 
+                opacity: 0.1;
+                transform: scaleX(-1) translateY(0px); 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 太陽 (sun.gif) -->
+        <img src="sun.gif" class="static-sun" alt="太陽">
+
+        <!-- 後方怒氣黑車 (ANGRY_CAR.gif) -->
+        <img src="ANGRY_CAR.gif" class="angry-car" alt="怒氣後車">
+
+        <!-- 主角紅車 (CAR.gif) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 對向藍車 (CAR2.gif) -->
+        <img src="CAR2.gif" class="opposite-car" alt="對向來車">
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>允讓後車事件 - 任務失敗（撞擊停擺與失敗標題版）</title>
+    <style>
+        /* 1. 遊戲視窗容器 */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            /* 導入背景，設定水平重複 */
+            background-image: url('background.png');
+            background-size: auto 100%; 
+            background-repeat: repeat-x; 
+            
+            /* 🛠️ 修正：背景改為與 7 秒時間軸同步，45% 撞擊時停止滾動 */
+            animation: scrollBackground 7s linear forwards;
+            z-index: 1;
+        }
+
+        /* 🛠️ 背景往左捲動關鍵影格：45% 撞擊瞬間座標凍結 */
+        @keyframes scrollBackground {
+            0% { background-position: 0 0; }
+            45%, 100% { background-position: -900px 0; } /* 45% 撞擊後停止滾動 */
+        }
+
+        /* 2. 獨立太陽定位 */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;      
+            width: 172px;    
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 3. 後方黑車 (ANGRY_CAR.gif) 試圖超車並發生撞擊動畫 */
+        .angry-car {
+            position: absolute;
+            width: 255px;       
+            height: auto;       
+            bottom: 65px;       
+            
+            animation: angryCarOvertakeCrash 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 4. 主角紅車 (CAR.gif) 正常行駛怠速動畫 */
+        .player-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: -5px;       
+            
+            animation: redCarEnterStage 7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            z-index: 2; 
+        }
+
+        /* 5. 唯一一輛對向藍車 (單次駛入並相撞) */
+        .opposite-car {
+            position: absolute;
+            width: 160px;       
+            height: auto;       
+            bottom: 60px;       
+            z-index: 1.8;       
+            
+            transform: scaleX(-1); /* 鏡像翻轉車頭朝左 */
+            
+            animation: oppositeCarCrash 7s linear forwards;
+        }
+
+        /* 6. 爆炸特效容器 (動態載入 BOMB.gif) */
+        .bomb-effect {
+            position: absolute;
+            width: 180px;       
+            height: 180px;      
+            left: 350px;        /* 兩車相撞的中心點 */
+            bottom: 65px;       
+            
+            animation: bombEffectFade 7s ease-out forwards;
+            z-index: 3;         
+            pointer-events: none;
+        }
+
+        /* 🛠️ 7. 「遊戲失敗！」標題定位與動畫 */
+        .failure-banner {
+            position: absolute;
+            width: 200px;       /* 依標題圖片比例調配優質尺寸 */
+            height: auto;
+            left: 50%;
+            top: -100px;         /* 置中於畫面上半部 */
+            transform: translateX(-50%);
+            z-index: 4;         /* 最頂層 */
+            pointer-events: none;
+            opacity: 0;         /* 預設隱形 */
+            
+            /* 標題淡入動畫 */
+            animation: bannerFadeIn 7s ease-out forwards;
+        }
+
+        /* ==========================================
+           8. 動態時間軸控制 (Keyframes)
+           ========================================== */
+
+        /* 黑車強行切入對向車道超車，並於 45% 發生碰撞 */
+        @keyframes angryCarOvertakeCrash {
+            0% { left: 150px; bottom: 65px; transform: rotate(0deg); }
+            30% { left: 150px; bottom: 105px; transform: rotate(0deg); }
+            
+            /* 30% ~ 45% (2.1s - 3.15s)：急切向左上對向車道準備超車 */
+            45% { left: 280px; bottom: 105px; transform: rotate(-5deg); }
+            
+            /* 45.1% ~ 100% (撞擊發生瞬間)：車身震動並停在碰撞位置 */
+            45.1% { left: 280px; bottom: 105px; transform: rotate(5deg); }
+            46%, 100% { left: 280px; bottom: 105px; transform: rotate(0deg); }
+        }
+
+        /* 主角紅車：入場後保持在下方車道怠速 */
+        @keyframes redCarEnterStage {
+            0% { left: 315px; transform: translateY(0px); }
+            30% { left: 315px; transform: translateY(0px); }
+            40% { left: 315px; transform: translateY(-3px); }
+            50% { left: 315px; transform: translateY(0px); }
+            60% { left: 315px; transform: translateY(-3px); }
+            70% { left: 315px; transform: translateY(0px); }
+            80% { left: 315px; transform: translateY(-3px); }
+            90%, 100% { left: 315px; transform: translateY(0px); }
+        }
+
+        /* 對向藍車時間軸：單次駛入並於 45% 與黑車撞擊定格 */
+        @keyframes oppositeCarCrash {
+            0% { 
+                left: 1100px; 
+                opacity: 0.1;
+                transform: scaleX(-1) translateY(0px); 
+            }
+            30% {
+                opacity: 1;
+                transform: scaleX(-1) translateY(-2px); 
+            }
+            /* 45% (第 3.15 秒)：相撞瞬間 */
+            45% { 
+                left: 440px; 
+                opacity: 1;
+                transform: scaleX(-1) rotate(5deg); 
+            }
+            /* 45.1% ~ 100%：撞擊後定格佇立在現場 */
+            45.1%, 100% { 
+                left: 440px; 
+                opacity: 1;
+                transform: scaleX(-1) rotate(0deg); 
+            }
+        }
+
+        /* 爆炸特效：45% 撞擊瞬間動態載入 BOMB.gif */
+        @keyframes bombEffectFade {
+            0%, 44.9% { 
+                content: none;
+                opacity: 0; 
+                transform: scale(0.5); 
+            }
+            /* 45% 撞擊發生瞬間載入 GIF */
+            45% {
+                content: url('BOMB.gif');
+                opacity: 1;
+                transform: scale(1.2) rotate(-4deg);
+            }
+            50% { transform: scale(1.15) rotate(4deg); }
+            55% { transform: scale(1.1) rotate(-2deg); }
+            60% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                content: url('BOMB.gif');
+            }
+            /* 80% ~ 100%：淡出隱形並移除圖片 */
+            80% {
+                opacity: 0;
+                transform: scale(0.8);
+                content: url('BOMB.gif');
+            }
+            80.1%, 100% {
+                content: none;
+                opacity: 0;
+            }
+        }
+
+        /* 🛠️ 「遊戲失敗！」標題淡入關鍵影格 (爆炸完畢後淡出) */
+        @keyframes bannerFadeIn {
+            0%, 60% {
+                opacity: 0;
+                transform: translate(-50%, -15px) scale(0.9);
+            }
+            75%, 100% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-viewport">
+        <!-- 太陽 (sun.gif) -->
+        <img src="sun.gif" class="static-sun" alt="太陽">
+
+        <!-- 後方怒氣黑車 (ANGRY_CAR.gif) -->
+        <img src="ANGRY_CAR.gif" class="angry-car" alt="怒氣後車">
+
+        <!-- 主角紅車 (CAR.gif) -->
+        <img src="CAR.gif" class="player-car" alt="紅車主角">
+
+        <!-- 對向碰撞藍車 (CAR2.gif) -->
+        <img src="CAR2.gif" class="opposite-car" alt="對向碰撞來車">
+
+        <!-- 爆炸特效容器 (45% 載入 BOMB.gif) -->
+        <div class="bomb-effect"></div>
+
+        <!-- 🛠️ 新增：「遊戲失敗！」標題圖片 -->
+        <img src="遊戲失敗.png" class="failure-banner" alt="遊戲失敗標題">
+    </div>
+
+</body>
+</html>
