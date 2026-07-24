@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲標題畫面與說明 - 緊湊無空白版</title>
+    <style>
+        /* 全域基礎設定 */
+        body {
+            background-color: #f4f6f0;
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            margin: 0;
+            padding: 20px 0 50px 0;
+        }
+
+        /* 1. 遊戲視窗容器 (1000px * 400px) */
+        .game-viewport {
+            width: 1000px;
+            height: 400px;
+            margin: 20px auto 0 auto;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #4c8537;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            
+            background-image: url('begin.png');
+            background-size: 100% 100%; 
+            background-repeat: no-repeat;
+            z-index: 1;
+        }
+
+        /* 太陽定位 */
+        .static-sun {
+            position: absolute;
+            top: -62px;      
+            left: 98px;     
+            width: 172px;   
+            height: auto;
+            z-index: 1.5;   
+            pointer-events: none;
+        }
+
+        /* 花朵物件 */
+        .scenery-flower {
+            position: absolute;
+            width: 130px; 
+            height: auto;
+            z-index: 1.5; 
+            pointer-events: none;
+        }
+
+        .flower-left { left: 380px; bottom: -50px; }
+        .flower-right { right: 180px; bottom: -50px; }
+
+        /* 欄杆物件 */
+        .foreground-fence {
+            position: absolute;
+            width: 225px;       
+            height: 88px;       
+            left: 145px;        
+            bottom: 30px;       
+            background-image: url('fence.png');
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        /* 霧霧濾鏡遮罩 (.fog-filter) */
+        .fog-filter {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background-image: url('霧霧濾鏡.png');
+            background-size: 100% 100%;
+            opacity: 0.65; 
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* 標題畫面文字圖片 (.title-banner) */
+        .title-banner {
+            position: absolute;
+            width: 480px; 
+            height: auto;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            pointer-events: none;
+            
+            animation: pulseBlink 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseBlink {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.98); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+        }
+
+        /* ==========================================
+           2. 🛠️ 視窗下方說明區 (緊湊無留白版)
+           ========================================== */
+        .game-info-container {
+            width: 1000px;
+            margin: 15px auto 0 auto;
+            
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            gap: 8px; /* 🛠️ 縮減文字與圖片之間的間距 */
+            box-sizing: border-box;
+            padding: 0 10px;
+        }
+
+        /* 上方說明文字區塊 */
+        .info-text-block {
+            width: 100%;
+            max-width: 850px;
+            text-align: center;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* 警告標題 */
+        .warning-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #d9534f;
+            margin-top: 0;
+            margin-bottom: 6px; /* 🛠️ 緊湊標題間距 */
+        }
+
+        /* 故事說明內文 */
+        .story-description {
+            font-size: 17px;
+            line-height: 1.6;
+            color: #4a5568;
+            margin: 0; /* 🛠️ 清除預設 Margins */
+        }
+
+        /* 🛠️ 下方手勢示意圖 (利用負 margin 向上貼緊文字) */
+        .gesture-diagram {
+            width: 750px;
+            height: auto;
+            margin-top: -300px; /* 🛠️ 向上向上拉近 25px，徹底壓掉圖檔透明空白 */
+            border-radius: 8px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 遊戲視窗畫面 -->
+    <div class="game-viewport">
+        <!-- 獨立靜態太陽與背景物件 -->
+        <img src="SUN.gif" class="static-sun" alt="太陽">
+        <img src="FLOWER.gif" class="scenery-flower flower-left" alt="裝飾花朵">
+        <img src="FLOWER.gif" class="scenery-flower flower-right" alt="裝飾花朵">
+        <div class="foreground-fence"></div>
+
+        <!-- 霧霧濾鏡半透明遮罩 -->
+        <div class="fog-filter"></div>
+
+        <!-- 標題畫面 (按ENTER鍵進入遊戲) -->
+        <img src="標題畫面.png" class="title-banner" alt="按ENTER鍵進入遊戲">
+    </div>
+
+    <!-- 2. 視窗下方遊戲說明區 (縮減間距緊湊版) -->
+    <div class="game-info-container">
+        <!-- 上方：說明文字塊 -->
+        <div class="info-text-block">
+            <div class="warning-title">糟糕！車燈突然故障了！</div>
+            <p class="story-description">
+                操作者必須前往修車廠進行維修。在抵達之前，只能透過駕駛人手勢向後方車輛表達行駛意圖，避免發生交通事故。快一起安全抵達修車廠吧！
+            </p>
+        </div>
+
+        <!-- 下方：向上拉近之手勢示意圖 -->
+        <img src="手勢示意圖.png" class="gesture-diagram" alt="駕駛手勢示意圖">
+    </div>
+
+</body>
+</html>
